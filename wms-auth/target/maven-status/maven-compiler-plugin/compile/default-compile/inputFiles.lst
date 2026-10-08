@@ -1,0 +1,13 @@
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/controller/AuthController.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/domain/vo/LoginVO.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/domain/dto/ChangePasswordRequest.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/config/WebConfig.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/util/IpUtils.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/config/BeanConfig.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/domain/vo/UserInfoVO.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/WmsAuthApplication.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/domain/vo/TokenVO.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/guard/LoginGuard.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/domain/dto/LoginDTO.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/service/impl/AuthServiceImpl.java
+/Volumes/zhitai2/git/Java/wms/wms-auth/src/main/java/com/wms/auth/service/AuthService.java
