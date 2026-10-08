@@ -1,0 +1,5 @@
+com/wms/common/mybatis/audit/DefaultAuditUserProvider.class
+com/wms/common/mybatis/convert/PageConvert.class
+com/wms/common/mybatis/audit/AuditUserProvider.class
+com/wms/common/mybatis/audit/AuditMetaObjectHandler.class
+com/wms/common/mybatis/config/MybatisPlusConfig.class

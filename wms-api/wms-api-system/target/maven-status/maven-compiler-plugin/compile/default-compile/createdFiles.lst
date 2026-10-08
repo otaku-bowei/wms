@@ -1,0 +1,8 @@
+com/wms/api/system/dto/ChangePasswordDTO.class
+com/wms/api/system/dto/LoginInfoDTO.class
+com/wms/api/system/dto/PermissionNodeDTO.class
+com/wms/api/system/dto/LoginLogDTO.class
+com/wms/api/system/client/UserFeignClient.class
+com/wms/api/system/client/LoginLogFeignClient.class
+com/wms/api/system/dto/UserAuthDTO.class
+com/wms/api/system/client/PermissionFeignClient.class
