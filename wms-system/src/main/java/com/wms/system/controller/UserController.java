@@ -58,7 +58,7 @@ public class UserController {
     @GetMapping("/{id}")
     @RequirePermission("user:view")
     public R<UserVO> detail(@PathVariable("id") Long id) {
-        return R.ok(userService.getById(id));
+        return R.ok(userService.getUserDetail(id));
     }
 
     @Operation(summary = "修改用户")

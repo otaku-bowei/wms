@@ -75,7 +75,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUser(Long id, UserUpdateDTO dto) {
-        SysUser user = this.getById(id);
+        SysUser user = super.getById(id);
         if (user == null) {
             throw new BizException(ErrorCode.NOT_FOUND.getCode(), "用户不存在");
         }
@@ -91,7 +91,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void changeStatus(Long id, Integer status) {
-        SysUser user = this.getById(id);
+        SysUser user = super.getById(id);
         if (user == null) {
             throw new BizException(ErrorCode.NOT_FOUND.getCode(), "用户不存在");
         }
@@ -103,7 +103,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String resetPassword(Long id) {
-        SysUser user = this.getById(id);
+        SysUser user = super.getById(id);
         if (user == null) {
             throw new BizException(ErrorCode.NOT_FOUND.getCode(), "用户不存在");
         }
@@ -127,7 +127,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
 
     @Override
     public void changePassword(Long id, String oldPassword, String newPassword) {
-        SysUser user = this.getById(id);
+        SysUser user = super.getById(id);
         if (user == null) {
             throw new BizException(ErrorCode.NOT_FOUND.getCode(), "用户不存在");
         }
@@ -141,8 +141,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     }
 
     @Override
-    public UserVO getById(Long id) {
-        SysUser user = this.getById(id);
+    public UserVO getUserDetail(Long id) {
+        SysUser user = super.getById(id);
         if (user == null) {
             return null;
         }

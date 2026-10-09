@@ -1,6 +1,7 @@
 package com.wms.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wms.common.core.result.PageResult;
 import com.wms.common.redis.constant.RedisKeys;
@@ -46,7 +47,8 @@ public class ConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> i
             return;
         }
         for (Map.Entry<String, String> entry : params.entrySet()) {
-            SysConfig config = lambdaQuery().eq(SysConfig::getParamKey, entry.getKey()).one();
+            SysConfig config = this.getOne(Wrappers.<SysConfig>lambdaQuery()
+                    .eq(SysConfig::getParamKey, entry.getKey()));
             if (config == null) {
                 log.warn("系统参数不存在，已跳过：paramKey={}", entry.getKey());
                 continue;
@@ -69,7 +71,8 @@ public class ConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> i
         } catch (Exception e) {
             log.debug("读取参数缓存失败：paramKey={}", paramKey);
         }
-        SysConfig config = lambdaQuery().eq(SysConfig::getParamKey, paramKey).one();
+        SysConfig config = this.getOne(Wrappers.<SysConfig>lambdaQuery()
+                .eq(SysConfig::getParamKey, paramKey));
         String value = config == null ? null : config.getParamValue();
         if (value != null) {
             try {

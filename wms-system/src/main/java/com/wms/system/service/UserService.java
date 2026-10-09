@@ -69,7 +69,7 @@ public interface UserService {
      * @param id 用户 ID
      * @return 用户信息
      */
-    UserVO getById(Long id);
+    UserVO getUserDetail(Long id);
 
     /**
      * 分页查询用户

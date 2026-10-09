@@ -1,5 +1,6 @@
 package com.wms.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wms.common.core.exception.BizException;
 import com.wms.common.core.result.ErrorCode;
@@ -57,7 +58,8 @@ public class CodeRuleServiceImpl extends ServiceImpl<SysCodeRuleMapper, SysCodeR
 
     @Override
     public String generateNextCode(String ruleType) {
-        SysCodeRule rule = lambdaQuery().eq(SysCodeRule::getRuleType, ruleType).one();
+        SysCodeRule rule = this.getOne(new LambdaQueryWrapper<SysCodeRule>()
+                .eq(SysCodeRule::getRuleType, ruleType));
         if (rule == null) {
             throw new BizException(ErrorCode.CODE_RULE_NOT_FOUND);
         }

@@ -53,7 +53,8 @@ public class RoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impleme
 
     @Override
     public SysRole getById(Long id) {
-        return this.getById(id);
+        // 调用 ServiceImpl 实现，避免使用 this 导致递归
+        return super.getById(id);
     }
 
     @Override
