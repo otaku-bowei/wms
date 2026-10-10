@@ -42,6 +42,20 @@ public enum ErrorCode {
     SKU_NOT_FOUND(20006, "SKU 不存在"),
     SKU_DELETE_FORBIDDEN(20007, "该 SKU 已产生业务记录，不可删除"),
 
+    /* ==================== 入库 21xxxx ==================== */
+    INBOUND_NO_EXISTS(21001, "入库单号已存在"),
+    INBOUND_NOT_FOUND(21002, "入库单不存在"),
+    INBOUND_STATUS_INVALID(21003, "入库单状态不允许该操作"),
+    INBOUND_QTY_EXCEED(21004, "上架数量超过待上架数量"),
+
+    /* ==================== 库存 22xxxx ==================== */
+    STOCK_NOT_FOUND(22001, "库存记录不存在"),
+    STOCK_NOT_ENOUGH(22002, "可用库存不足"),
+
+    /* ==================== 调整 23xxxx ==================== */
+    ADJUST_NOT_FOUND(23001, "调整单不存在"),
+    ADJUST_STATUS_INVALID(23002, "调整单状态不允许审批"),
+
     /* ==================== 仓库 3xxxx ==================== */
     WAREHOUSE_CODE_EXISTS(30001, "仓库编码已存在"),
     WAREHOUSE_DISABLED(30002, "仓库已停用，无法创建出入库单"),
