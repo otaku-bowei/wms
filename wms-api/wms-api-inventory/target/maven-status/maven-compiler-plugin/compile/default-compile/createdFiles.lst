@@ -1,0 +1,3 @@
+com/wms/api/inventory/dto/StockVO.class
+com/wms/api/inventory/dto/StockChangeDTO.class
+com/wms/api/inventory/client/StockFeignClient.class

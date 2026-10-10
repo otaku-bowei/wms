@@ -30,6 +30,7 @@
 
     <modules>
         <module>wms-api-system</module>
+        <module>wms-api-inventory</module>
     </modules>
 
     <dependencyManagement>
@@ -51,6 +52,11 @@
             <dependency>
                 <groupId>com.wms</groupId>
                 <artifactId>wms-api-system</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wms</groupId>
+                <artifactId>wms-api-inventory</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
