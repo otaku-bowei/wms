@@ -56,6 +56,17 @@ public enum ErrorCode {
     ADJUST_NOT_FOUND(23001, "调整单不存在"),
     ADJUST_STATUS_INVALID(23002, "调整单状态不允许审批"),
 
+    /* ==================== 出库 24xxxx ==================== */
+    OUTBOUND_NO_EXISTS(24001, "出库单号已存在"),
+    OUTBOUND_NOT_FOUND(24002, "出库单不存在"),
+    OUTBOUND_STATUS_INVALID(24003, "出库单状态不允许该操作"),
+    OUTBOUND_STOCK_LOCK_FAIL(24004, "库存锁定失败，可用库存不足"),
+    OUTBOUND_STOCK_DECREASE_FAIL(24005, "库存扣减失败，可用库存不足"),
+    OUTBOUND_QTY_EXCEED(24006, "拣货/打包数量超过待处理数量"),
+    WAVE_NOT_FOUND(24007, "波次不存在"),
+    WAVE_STATUS_INVALID(24008, "波次状态不允许该操作"),
+    PICK_TASK_NOT_FOUND(24009, "拣货任务不存在"),
+
     /* ==================== 仓库 3xxxx ==================== */
     WAREHOUSE_CODE_EXISTS(30001, "仓库编码已存在"),
     WAREHOUSE_DISABLED(30002, "仓库已停用，无法创建出入库单"),
