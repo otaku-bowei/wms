@@ -106,7 +106,7 @@ public class InboundServiceImpl extends ServiceImpl<InboundOrderMapper, InboundO
 
     private InboundOrder requireOrder(Long id) {
         InboundOrder order = baseMapper.selectById(id);
-        if (order == null || order.getDeleted() == 1) {
+        if (order == null || Integer.valueOf(1).equals(order.getDeleted())) {
             throw new BizException(ErrorCode.INBOUND_NOT_FOUND);
         }
         return order;
