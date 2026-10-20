@@ -67,6 +67,15 @@ public enum ErrorCode {
     WAVE_STATUS_INVALID(24008, "波次状态不允许该操作"),
     PICK_TASK_NOT_FOUND(24009, "拣货任务不存在"),
 
+    /* ==================== 盘点 25xxxx ==================== */
+    COUNT_NOT_FOUND(25001, "盘点单不存在"),
+    COUNT_STATUS_INVALID(25002, "盘点单状态不允许该操作"),
+
+    /* ==================== 退货 26xxxx ==================== */
+    RETURN_NOT_FOUND(26001, "退货单不存在"),
+    RETURN_STATUS_INVALID(26002, "退货单状态不允许该操作"),
+    RETURN_GRADE_INVALID(26003, "退货质检等级不合法"),
+
     /* ==================== 仓库 3xxxx ==================== */
     WAREHOUSE_CODE_EXISTS(30001, "仓库编码已存在"),
     WAREHOUSE_DISABLED(30002, "仓库已停用，无法创建出入库单"),
