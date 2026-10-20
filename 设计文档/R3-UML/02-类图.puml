@@ -1,0 +1,97 @@
+@startuml R3 出库核心类/函数图
+
+package "Controller (api/v1/outbound)" {
+  class OutboundController {
+    + create(OutboundCreateVO) : R<Long>
+    + page(pageNum, pageSize) : R<PageResult>
+    + allocate(id) : R<Void>
+    + cancel(id) : R<Void>
+  }
+  class WaveController {
+    + create(WaveOrder) : R<Long>
+    + generate(WaveGenerateVO) : R<Void>
+    + page(...) : R<PageResult>
+  }
+  class PickController {
+    + createTasks(waveId) : R<Void>
+    + confirm(PickConfirmVO) : R<Void>
+    + page(...) : R<PageResult>
+  }
+  class PackageController {
+    + pack(PackVO) : R<Long>
+    + ship(ShipVO) : R<Void>
+  }
+}
+
+package "Service 接口" {
+  interface OutboundService {
+    + createOrder(OutboundOrder, List<OutboundItem>) : Long
+    + allocate(Long) : void
+    + cancel(Long) : void
+    + page(long, long) : PageResult<OutboundOrder>
+  }
+  interface WaveService {
+    + createWave(WaveOrder) : Long
+    + generate(WaveGenerateVO) : void
+    + page(long, long) : PageResult<WaveOrder>
+  }
+  interface PickService {
+    + createTasks(Long) : void
+    + confirmPick(PickConfirmVO) : void
+    + page(long, long) : PageResult<PickTask>
+  }
+  interface PackageService {
+    + pack(PackVO) : Long
+    + ship(ShipVO) : void
+  }
+}
+
+package "Service 实现" {
+  class OutboundServiceImpl
+  class WaveServiceImpl
+  class PickServiceImpl
+  class PackageServiceImpl
+}
+
+package "领域实体" {
+  class OutboundOrder
+  class OutboundItem
+  class WaveOrder
+  class WaveItem
+  class PickTask
+  class OutboundPackage
+  class ShippingRecord
+}
+
+package "库存服务(外部 wms-inventory)" {
+  interface StockFeignClient {
+    + lock(StockChangeDTO) : R<Void>
+    + unlock(StockChangeDTO) : R<Void>
+    + decrease(StockChangeDTO) : R<Void>
+  }
+}
+
+OutboundController ..> OutboundService
+WaveController ..> WaveService
+PickController ..> PickService
+PackageController ..> PackageService
+
+OutboundServiceImpl ..|> OutboundService
+WaveServiceImpl ..|> WaveService
+PickServiceImpl ..|> PickService
+PackageServiceImpl ..|> PackageService
+
+OutboundServiceImpl ..> StockFeignClient : 锁/释放
+WaveServiceImpl ..> StockFeignClient : 锁
+PackageServiceImpl ..> StockFeignClient : 解锁+扣减
+
+OutboundServiceImpl ..> OutboundOrder
+OutboundServiceImpl ..> OutboundItem
+WaveServiceImpl ..> WaveOrder
+WaveServiceImpl ..> WaveItem
+PickServiceImpl ..> PickTask
+PickServiceImpl ..> OutboundItem
+PickServiceImpl ..> OutboundOrder
+PackageServiceImpl ..> OutboundPackage
+PackageServiceImpl ..> ShippingRecord
+@enduml

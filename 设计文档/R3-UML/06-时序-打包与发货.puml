@@ -1,0 +1,47 @@
+@startuml 复核打包与发货 pack/ship
+title PackageService.pack / ship —— 复核打包 + 装车扣库存
+
+actor User
+participant "PackageController" as C
+participant "PackageService" as S
+participant "OutboundOrderMapper" as OM
+participant "OutboundPackageMapper" as PkgM
+participant "OutboundItemMapper" as IM
+participant "StockFeignClient\n(wms-inventory)" as ST
+participant "ShippingRecordMapper" as SM
+
+== 复核打包 pack（PICKED → PACKING） ==
+User -> C : POST /pack
+C -> S : pack(PackVO{outboundId,...})
+activate S
+S -> OM : selectById(outboundId)
+S -> S : 校验 PICKED，否则 24003
+S -> PkgM : insert(OutboundPackage{status=PACKED, packer,...})
+S -> OM : updateById(status=PACKING)
+deactivate S
+S --> C : packageId
+C --> User : 200 OK
+
+== 装车发货 ship（PACKING → SHIPPED） ==
+User -> C : POST /ship
+C -> S : ship(ShipVO{outboundId,...})
+activate S
+S -> OM : selectById(outboundId)
+S -> S : 校验 PACKING，否则 24003
+S -> IM : selectList(outboundId, deleted=0)
+loop 每个明细
+  S -> ST : unlock(planQty)   // 释放预留
+  S -> ST : decrease(shipQty) // shipQty=已拣>0?已拣:计划
+  alt 失败
+    ST --> S : R.fail()
+    S -> S : 抛 BizException(24005)
+  end
+  S -> IM : updateById(shippedQty)
+end
+S -> OM : updateById(status=SHIPPED, shipTime)
+S -> PkgM : selectOne(outboundId) → updateById(status=SHIPPED)
+S -> SM : insert(ShippingRecord{status=LOADED, vehicleNo,...})
+deactivate S
+S --> C : void
+C --> User : 200 OK
+@enduml

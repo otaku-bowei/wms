@@ -1,0 +1,33 @@
+@startuml 分配库存 allocate
+title OutboundService.allocate(Long id) —— DRAFT → ALLOCATED
+actor User
+participant "OutboundController" as C
+participant "OutboundService" as S
+participant "OutboundOrderMapper" as OM
+participant "OutboundItemMapper" as IM
+participant "StockFeignClient\n(wms-inventory)" as ST
+
+User -> C : PUT /orders/{id}/allocate
+C -> S : allocate(id)
+activate S
+S -> OM : selectById(id)
+OM --> S : OutboundOrder
+S -> S : 校验 status == DRAFT\n否则 24003
+S -> IM : selectList(outboundId, deleted=0)
+IM --> S : List<OutboundItem>
+
+loop 每个明细 item
+  S -> ST : lock(StockChangeDTO{skuId,locationId,batchNo,planQty,relatedNo})
+  alt 锁定成功
+    ST --> S : R.ok()
+  else 可用库存不足
+    ST --> S : R.fail()
+    S -> S : 抛 BizException(24004)
+  end
+end
+
+S -> OM : updateById(status=ALLOCATED)
+deactivate S
+S --> C : void
+C --> User : 200 OK
+@enduml

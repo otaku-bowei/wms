@@ -1,0 +1,34 @@
+@startuml R3 出库单状态机
+title 出库单状态机（OutboundStatus）
+[*] --> DRAFT : 创建出库单\ncreateOrder()
+
+DRAFT --> ALLOCATED : allocate()\n锁库存
+DRAFT --> CANCELLED : cancel()
+
+ALLOCATED --> PICKING : 生成拣货任务\ncreateTasks()
+ALLOCATED --> CANCELLED : cancel()\n释放锁定
+
+PICKING --> PICKED : 拣货全部完成\nconfirmPick()
+PICKING --> CANCELLED : cancel()
+
+PICKED --> PACKING : pack()\n复核打包
+PICKED --> CANCELLED : cancel()
+
+PACKING --> SHIPPED : ship()\n扣减库存+装车
+PACKING --> CANCELLED : cancel()
+
+SHIPPED --> [*]
+CANCELLED --> [*]
+
+note right of ALLOCATED
+  已锁定库存：
+  StockFeignClient.lock()
+  取消时 unlock()
+end note
+
+note right of SHIPPED
+  发货时：
+  unlock(planQty) + decrease(shipQty)
+  生成 shipping_record(LOADED)
+end note
+@enduml

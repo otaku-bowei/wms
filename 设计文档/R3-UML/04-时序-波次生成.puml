@@ -1,0 +1,36 @@
+@startuml 波次生成 generate
+title WaveService.generate(WaveGenerateVO) —— 纳入出库单并锁定库存
+actor User
+participant "WaveController" as C
+participant "WaveService" as S
+participant "WaveOrderMapper" as WM
+participant "OutboundOrderMapper" as OM
+participant "OutboundItemMapper" as IM
+participant "WaveItemMapper" as WIM
+participant "StockFeignClient\n(wms-inventory)" as ST
+
+User -> C : POST /waves/generate
+C -> S : generate(WaveGenerateVO{waveId, orderIds})
+activate S
+S -> WM : selectById(waveId)
+WM --> S : WaveOrder
+S -> S : 校验 PENDING → GENERATING\n否则 24008
+S -> WM : updateById(GENERATING)
+
+loop 每个 orderId
+  S -> OM : selectById(orderId)
+  S -> S : 校验 DRAFT，否则 24003
+  S -> IM : selectList(outboundId, deleted=0)
+  loop 每个明细
+    S -> ST : lock(StockChangeDTO)
+    ST --> S : R.ok() / fail(24004)
+  end
+  S -> OM : updateById(status=ALLOCATED)
+  S -> WIM : insert(WaveItem{waveId,outboundId,status=PENDING})
+end
+
+S -> WM : updateById(status=GENERATED)
+deactivate S
+S --> C : void
+C --> User : 200 OK
+@enduml

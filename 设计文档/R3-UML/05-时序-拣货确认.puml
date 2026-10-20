@@ -1,0 +1,36 @@
+@startuml 拣货确认 confirmPick
+title PickService.confirmPick(PickConfirmVO) —— 回写已拣数量
+actor PDA
+participant "PickController" as C
+participant "PickService" as S
+participant "PickTaskMapper" as PM
+participant "OutboundItemMapper" as IM
+participant "OutboundOrderMapper" as OM
+participant "WaveItemMapper" as WIM
+
+PDA -> C : PUT /pick/confirm
+C -> S : confirmPick(PickConfirmVO{taskId,actualQty,...})
+activate S
+S -> PM : selectById(taskId)
+PM --> S : PickTask
+S -> S : 校验 PENDING，否则 24003\n校验 actualQty>0 且 <= 待拣，否则 24006
+
+S -> IM : selectById(itemId)
+IM --> S : OutboundItem
+
+S -> PM : updateById(actualQty=PICKED, picker, pickTime)
+S -> IM : updateById(pickedQty += actualQty, locationId)
+
+S -> PM : selectList(outboundId, deleted=0)
+PM --> S : List<PickTask>
+S -> S : 是否全部 PICKED？
+alt 全部完成
+  S -> OM : updateById(status=PICKED)
+  S -> WIM : updateById(status=PICKED)
+else 仍有未完成
+  S -> S : 保持 PICKING
+end
+deactivate S
+S --> C : void
+C --> PDA : 200 OK
+@enduml
