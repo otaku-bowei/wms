@@ -1,0 +1,62 @@
+-- WMS R4 盘点与退货建表：count_order / count_item / return_order / return_item
+SET NAMES utf8mb4; SET FOREIGN_KEY_CHECKS = 0; USE `wms`;
+CREATE TABLE IF NOT EXISTS `count_order` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `count_no` VARCHAR(32) NOT NULL COMMENT '盘点单号',
+    `warehouse_id` BIGINT UNSIGNED NOT NULL COMMENT '仓库ID',
+    `count_type` VARCHAR(20) NOT NULL DEFAULT 'CYCLE' COMMENT 'FULL/CYCLE/SPOT',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/COUNTING/COMPLETED/CANCELLED',
+    `reason` VARCHAR(100) DEFAULT NULL COMMENT '盘点原因',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_by` VARCHAR(50) DEFAULT NULL, `operator` VARCHAR(50) DEFAULT NULL,
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), UNIQUE KEY `uk_count_no` (`count_no`),
+    KEY `idx_warehouse_id` (`warehouse_id`), KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='盘点单';
+CREATE TABLE IF NOT EXISTS `count_item` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `count_id` BIGINT UNSIGNED NOT NULL COMMENT '盘点单ID',
+    `sku_id` BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
+    `location_id` BIGINT UNSIGNED NOT NULL COMMENT '库位ID',
+    `batch_no` VARCHAR(50) DEFAULT NULL COMMENT '批次号',
+    `system_qty` INT NOT NULL DEFAULT 0 COMMENT '系统库存',
+    `counted_qty` INT DEFAULT NULL COMMENT '实盘数量',
+    `diff_qty` INT NOT NULL DEFAULT 0 COMMENT '差异数量',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/COUNTED/ADJUSTED',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), KEY `idx_count_id` (`count_id`), KEY `idx_sku_id` (`sku_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='盘点明细';
+CREATE TABLE IF NOT EXISTS `return_order` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `return_no` VARCHAR(32) NOT NULL COMMENT '退货单号',
+    `related_order_no` VARCHAR(64) DEFAULT NULL COMMENT '关联原出库单号',
+    `warehouse_id` BIGINT UNSIGNED NOT NULL COMMENT '仓库ID',
+    `return_reason` VARCHAR(100) DEFAULT NULL COMMENT '退货原因',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'CREATED' COMMENT 'CREATED/RECEIVED/INSPECTED/RESHELVED/CLOSED',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), UNIQUE KEY `uk_return_no` (`return_no`),
+    KEY `idx_warehouse_id` (`warehouse_id`), KEY `idx_status` (`status`), KEY `idx_related_order_no` (`related_order_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='退货单';
+CREATE TABLE IF NOT EXISTS `return_item` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `return_id` BIGINT UNSIGNED NOT NULL COMMENT '退货单ID',
+    `sku_id` BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
+    `location_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '建议上架库位',
+    `plan_qty` INT NOT NULL DEFAULT 0 COMMENT '退货数量',
+    `received_qty` INT NOT NULL DEFAULT 0 COMMENT '实收数量',
+    `grade` VARCHAR(10) DEFAULT NULL COMMENT '质检等级 A/B/C',
+    `reshelved_qty` INT NOT NULL DEFAULT 0 COMMENT '已重新上架数量',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), KEY `idx_return_id` (`return_id`), KEY `idx_sku_id` (`sku_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='退货明细';
