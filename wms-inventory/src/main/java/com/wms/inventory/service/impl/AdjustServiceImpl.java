@@ -69,7 +69,7 @@ public class AdjustServiceImpl extends ServiceImpl<InvAdjustMapper, InvAdjust> i
         if (adjust == null) {
             throw new BizException(ErrorCode.ADJUST_NOT_FOUND);
         }
-        if (!"PENDING".equals(adjust.getStatus())) {
+        if (!"PENDING".equals(adjust.getStatus()) && !"DRAFT".equals(adjust.getStatus())) {
             throw new BizException(ErrorCode.ADJUST_STATUS_INVALID);
         }
         adjust.setAuditor(auditor);
