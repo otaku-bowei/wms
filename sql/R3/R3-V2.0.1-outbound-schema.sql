@@ -1,0 +1,108 @@
+-- WMS R3 出库域建表：outbound_order / outbound_item / wave_order / wave_item / pick_task / outbound_package / shipping_record
+SET NAMES utf8mb4; SET FOREIGN_KEY_CHECKS = 0; USE `wms`;
+CREATE TABLE IF NOT EXISTS `outbound_order` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `outbound_no` VARCHAR(32) NOT NULL COMMENT '出库单号',
+    `warehouse_id` BIGINT UNSIGNED NOT NULL COMMENT '仓库ID',
+    `order_source` VARCHAR(20) NOT NULL DEFAULT 'PLATFORM' COMMENT 'PLATFORM/OMS/MANUAL',
+    `related_order_no` VARCHAR(64) DEFAULT NULL COMMENT '来源订单号',
+    `carrier_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '物流商ID',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'DRAFT' COMMENT 'DRAFT/ALLOCATED/PICKING/PICKED/PACKING/SHIPPED/CANCELLED',
+    `ship_time` DATETIME DEFAULT NULL COMMENT '发货时间',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_by` VARCHAR(50) DEFAULT NULL, `update_by` VARCHAR(50) DEFAULT NULL,
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), UNIQUE KEY `uk_outbound_no` (`outbound_no`),
+    KEY `idx_warehouse_id` (`warehouse_id`), KEY `idx_status` (`status`), KEY `idx_related_order_no` (`related_order_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='出库单';
+CREATE TABLE IF NOT EXISTS `outbound_item` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `outbound_id` BIGINT UNSIGNED NOT NULL COMMENT '出库单ID',
+    `sku_id` BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
+    `plan_qty` INT NOT NULL DEFAULT 0 COMMENT '需求数量',
+    `picked_qty` INT NOT NULL DEFAULT 0 COMMENT '已拣数量',
+    `packed_qty` INT NOT NULL DEFAULT 0 COMMENT '已打包数量',
+    `shipped_qty` INT NOT NULL DEFAULT 0 COMMENT '已发数量',
+    `batch_no` VARCHAR(50) DEFAULT NULL COMMENT '批次号',
+    `location_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '推荐/实际拣货库位ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), KEY `idx_outbound_id` (`outbound_id`), KEY `idx_sku_id` (`sku_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='出库明细';
+CREATE TABLE IF NOT EXISTS `wave_order` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `wave_no` VARCHAR(32) NOT NULL COMMENT '波次号',
+    `warehouse_id` BIGINT UNSIGNED NOT NULL COMMENT '仓库ID',
+    `wave_strategy` VARCHAR(20) NOT NULL DEFAULT 'ZONE' COMMENT 'LOGISTICS/ZONE/URGENT/TIME',
+    `max_orders` INT NOT NULL DEFAULT 50 COMMENT '最大订单数',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/GENERATING/GENERATED/CANCELLED',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), UNIQUE KEY `uk_wave_no` (`wave_no`), KEY `idx_warehouse_id` (`warehouse_id`), KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='波次单';
+CREATE TABLE IF NOT EXISTS `wave_item` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `wave_id` BIGINT UNSIGNED NOT NULL COMMENT '波次ID',
+    `outbound_id` BIGINT UNSIGNED NOT NULL COMMENT '出库单ID',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/PICKING/PICKED/PACKED/SHIPPED',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), KEY `idx_wave_id` (`wave_id`), KEY `idx_outbound_id` (`outbound_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='波次明细（关联出库单）';
+CREATE TABLE IF NOT EXISTS `pick_task` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `task_no` VARCHAR(32) NOT NULL COMMENT '拣货任务号',
+    `wave_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '波次ID',
+    `outbound_id` BIGINT UNSIGNED NOT NULL COMMENT '出库单ID',
+    `item_id` BIGINT UNSIGNED NOT NULL COMMENT '出库明细ID',
+    `sku_id` BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
+    `warehouse_id` BIGINT UNSIGNED NOT NULL COMMENT '仓库ID',
+    `location_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '拣货库位ID',
+    `plan_qty` INT NOT NULL DEFAULT 0 COMMENT '计划拣货数量',
+    `actual_qty` INT NOT NULL DEFAULT 0 COMMENT '实际拣货数量',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/PICKING/PICKED/CANCELLED',
+    `picker` VARCHAR(50) DEFAULT NULL COMMENT '拣货人', `pick_time` DATETIME DEFAULT NULL COMMENT '拣货时间',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), UNIQUE KEY `uk_task_no` (`task_no`),
+    KEY `idx_wave_id` (`wave_id`), KEY `idx_outbound_id` (`outbound_id`), KEY `idx_sku_id` (`sku_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='拣货任务';
+CREATE TABLE IF NOT EXISTS `outbound_package` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `package_no` VARCHAR(32) NOT NULL COMMENT '包裹号',
+    `outbound_id` BIGINT UNSIGNED NOT NULL COMMENT '出库单ID',
+    `carrier_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '物流商ID',
+    `tracking_no` VARCHAR(64) DEFAULT NULL COMMENT '运单号',
+    `weight` DECIMAL(10,3) DEFAULT NULL COMMENT '包裹重量(kg)',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/PACKED/SHIPPED',
+    `packer` VARCHAR(50) DEFAULT NULL COMMENT '打包人', `pack_time` DATETIME DEFAULT NULL COMMENT '打包时间',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), UNIQUE KEY `uk_package_no` (`package_no`),
+    KEY `idx_outbound_id` (`outbound_id`), KEY `idx_tracking_no` (`tracking_no`), KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='出库包裹（复核打包）';
+CREATE TABLE IF NOT EXISTS `shipping_record` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `outbound_id` BIGINT UNSIGNED NOT NULL COMMENT '出库单ID',
+    `package_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '包裹ID',
+    `carrier_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '物流商ID',
+    `tracking_no` VARCHAR(64) DEFAULT NULL COMMENT '运单号',
+    `vehicle_no` VARCHAR(32) DEFAULT NULL COMMENT '车辆号',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'LOADED' COMMENT 'LOADED/DELIVERED',
+    `loader` VARCHAR(50) DEFAULT NULL COMMENT '装车人', `load_time` DATETIME DEFAULT NULL COMMENT '装车时间',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`), KEY `idx_outbound_id` (`outbound_id`), KEY `idx_tracking_no` (`tracking_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='装车交接记录';
